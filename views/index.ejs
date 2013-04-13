@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NetMap Metrics Server</title>
+  <%= css('application') %>
+  <%= js('application') %>
+</head>
+<body>
+  <h1>NetMap Metrics Server</h1>
+
+  <p>General description</p>
+
+  <section id="new_app_container">
+    <h2>Create application</h2>
+    <form id="new_app_form">
+      <p class="field">
+        <label for="new_app_name">App Name</label>
+        <input type="text" required="required" name="name" id="new_app_name" />
+      </p>
+      <p class="field">
+        <label for="new_app_url">Backend URL</label>
+        <input type="text" required="required" name="url" id="new_app_url" />
+      </p>
+      <p class="action">
+        <button type="button">Create App</button>
+      </p>
+    </form>
+
+    <section id="new_app_response" class="hidden">
+      <h3>New Application Data</h3>
+      <p class="field">
+        <span>App ID</span>
+        <span id="new_app_id"></span>
+      </p>
+      <p class="field">
+        <span>App Secret</span>
+        <span id="new_app_secret"></span>
+      </p>
+      <p class="action">
+        <button type="button">Hide Info</button>
+      </p>
+    </section>
+  </section>
+</body>
+</html>
