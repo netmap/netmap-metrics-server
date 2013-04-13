@@ -2,10 +2,8 @@
 <html>
 <head>
   <title>NetMap Metrics Server</title>
-  <%= css('application') %>
-  <%= js('vendor/jquery') %>
-  <%= js('vendor/dropbox') %>
-  <%= js('application') %>
+  <%- assets.tag('/css/application.css') %>
+  <%- assets.tag('/js/application.js') %>
 </head>
 <body>
   <h1>NetMap Metrics Server</h1>
@@ -21,7 +19,12 @@
       </p>
       <p class="field">
         <label for="new_app_url">Backend URL</label>
-        <input type="text" required="required" name="url" id="new_app_url" />
+        <input type="url" required="required" name="url" id="new_app_url" />
+      </p>
+      <p class="field">
+        <label for="new_app_url">Backend URL</label>
+        <input type="email" required="required" name="email"
+               id="new_app_email" />
       </p>
       <p class="action">
         <button type="button">Create App</button>

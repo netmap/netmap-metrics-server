@@ -7,18 +7,21 @@ async = require 'async'
 glob = require 'glob'
 remove = require 'remove'
 
-task 'build', -> build()
+task 'build', ->
+  vendor ->
+    build()
 
 task 'clean', -> clean()
 
 task 'vendor', -> vendor()
 
 task 'test', ->
-  build ->
-    test_cases = glob.sync 'test/js/**/*_test.js'
-    test_cases.sort()  # Consistent test case order.
-    run 'node_modules/.bin/mocha --colors --slow 200 --timeout 20000 ' +
-        "--require test/js/helpers/setup.js #{test_cases.join(' ')}"
+  vendor ->
+    build ->
+      test_cases = glob.sync 'test/js/**/*_test.js'
+      test_cases.sort()  # Consistent test case order.
+      run 'node_modules/.bin/mocha --colors --slow 200 --timeout 20000 ' +
+          "--require test/js/helpers/setup.js #{test_cases.join(' ')}"
 
 task 'doc', ->
   run 'node_modules/.bin/codo src'
@@ -53,16 +56,8 @@ vendor = (callback) ->
   downloads = [
     ["https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js",
      "assets/js/vendor/jquery.min.js"],
-    ["https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.js",
-     "assets/js/vendor/jquery.js"],
-    ["https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.map",
-     "assets/js/vendor/jquery.min.map"],
     ["https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.9.2/dropbox.min.js",
      "assets/js/vendor/dropbox.min.js"],
-    ["https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.9.2/dropbox.js",
-     "assets/js/vendor/dropbox.js"],
-    ["https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.9.2/dropbox.min.map",
-     "assets/js/vendor/dropbox.min.map"],
     ["https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.2/html5shiv.js",
      "assets/js/vendor/html5shiv.js"]
   ]

@@ -4,35 +4,52 @@
 http = require 'http'
 path = require 'path'
 
-assets_middleware = require 'connect-assets'
 cors = require 'cors'
 express = require 'express'
 glob = require 'glob'
+rack = require 'asset-rack'
+
+application = express()
+appEnv = application.get 'env'
+appRoot = path.dirname __dirname
 
 # Settings.
-application = express()
 application.enable 'trust proxy'
 application.set 'port', process.env.PORT || 3000
-application.set 'views', path.join(path.dirname(__dirname), 'views')
+application.set 'views', path.join(appRoot, 'views')
 application.set 'view engine', 'ejs'
+application.set 'view options', layout: false
+
+# Assets
+assets = new rack.Rack [
+  new rack.LessAsset
+    url: '/css/application.css'
+    filename: path.join(appRoot, 'assets', 'css', 'application.less')
+    compress: appEnv is 'production'
+  new rack.SnocketsAsset
+    url: '/js/application.js'
+    filename: path.join(appRoot, 'assets', 'js', 'application.coffee')
+    compress: appEnv is 'production'
+]
+application.locals assets: assets
 
 # Middlewares.
-application.use assets_middleware(
-    env: application.get('env')
-    build: application.get('env') isnt 'development'
-    buildDir: path.join(path.dirname(__dirname), 'public')
-    src: path.join(path.dirname(__dirname), 'assets'))
-application.use express.static(path.join(path.dirname(__dirname), 'public'))
-application.use express.bodyParser()
+if appEnv is 'development'
+  application.use express.logger()
 
-if application.get('env') is 'development'
+application.use assets
+application.use express.static(path.join(appRoot, 'public'))
+application.use express.json()
+application.use express.urlencoded()
+application.use application.router
+
+if appEnv is 'development'
   application.use express.errorHandler()
 
 # Controllers.
 for controller in glob.sync(path.join(__dirname,  'controllers', '**.js'))
   require(controller)(application)
 
-# Boot.
-http.createServer(application).listen application.get('port'), ->
-  console.log 'NetMap Metrics Server listening on port ' +
-              application.get('port')
+
+# All done.
+module.exports = application
