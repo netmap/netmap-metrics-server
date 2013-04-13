@@ -11,6 +11,9 @@
 /js/*
 /test/js/*
 
+# Node output.
+npm-debug.log
+
 # Documentation output.
 /doc/*.html
 /doc/assets

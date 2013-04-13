@@ -18,15 +18,18 @@ application.set 'view engine', 'ejs'
 
 # Middlewares.
 application.use assets_middleware(
+    env: application.get('env')
     build: application.get('env') isnt 'development'
-    builtAssets: path.join(path.dirname(__dirname), 'public')
+    buildDir: path.join(path.dirname(__dirname), 'public')
     src: path.join(path.dirname(__dirname), 'assets'))
+application.use express.static(path.join(path.dirname(__dirname), 'public'))
 application.use express.bodyParser()
 
+if application.get('env') is 'development'
+  application.use express.errorHandler()
 
 # Controllers.
 for controller in glob.sync(path.join(__dirname,  'controllers', '**.js'))
-  console.log controller
   require(controller)(application)
 
 # Boot.
