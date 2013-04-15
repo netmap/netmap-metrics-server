@@ -20,12 +20,18 @@ task 'test', ->
     build ->
       test_cases = glob.sync 'test/js/**/*_test.js'
       test_cases.sort()  # Consistent test case order.
-      run 'node_modules/.bin/mocha --colors --slow 200 --timeout 20000 ' +
-          "--require test/js/helpers/setup.js #{test_cases.join(' ')}"
+      run 'node node_modules/mocha/bin/mocha --colors --slow 200 ' +
+          '--timeout 20000 --require test/js/helpers/setup.js ' +
+          test_cases.join(' ')
 
 task 'doc', ->
   run 'node_modules/.bin/codo src'
 
+task 'dbcreate', ->
+  dbCreate()
+
+task 'dbmigrate' ->
+  dbMigrate()
 
 build = (callback) ->
   fs.mkdirSync 'js' unless fs.existsSync 'js'
@@ -36,8 +42,8 @@ build = (callback) ->
   source_dirs = glob.sync('src/**/').concat glob.sync('test/src/**/')
   for source_dir in source_dirs
     out_dir = source_dir.replace(/^src/, 'js').replace(/^test\/src/, 'test/js')
-    commands.push "node_modules/.bin/coffee --output #{out_dir} --compile " +
-                  "--map #{path.join(source_dir, '*')}"
+    commands.push "node node_modules/coffee-script/bin/coffee " +
+        "--output #{out_dir} --compile --map #{path.join(source_dir, '*')}"
 
   async.eachSeries commands, run, ->
     callback() if callback
@@ -64,6 +70,10 @@ vendor = (callback) ->
   async.forEachSeries downloads, download, ->
     callback() if callback
 
+dbCreate = (callback) ->
+
+dbMigrate = (callback) ->
+  run 'node node-modules/db-migrate/bin/db-migrate up'
 
 download = ([url, file], callback) ->
   if fs.existsSync file

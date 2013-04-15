@@ -21,6 +21,7 @@
     "async": ">= 0",
     "coffee-script": ">= 1.6.2",
     "cors": ">= 0.0.5",
+    "db-migrate": ">= 0.4.1",
     "ejs": ">= 0.8.3",
     "express": ">= 3.1.2",
     "fs-extra": ">= 0.6.0",
@@ -45,8 +46,8 @@
     "test": "test"
   },
   "scripts": {
-    "prestart": "node node_modules/.bin/cake build",
+    "prestart": "node node_modules/coffee-script/bin/cake build",
     "start": "node js/boot.js",
-    "test": "node node_modules/.bin/cake test"
+    "test": "node node_modules/coffee-script/bin/cake test"
   }
 }
