@@ -5,8 +5,7 @@ App = require '../models/app'
 module.exports = (application) ->
   # Create.
   application.post '/apps', (req, res) ->
-    console.log req.params
-    App.create req.params.url, req.params.email, (error, app) ->
+    App.create req.body.url, req.body.email, (error, app) ->
       if error
         res.json 500, error: error
       else
@@ -14,7 +13,7 @@ module.exports = (application) ->
 
   # Retrieve.
   application.get '/apps/:app_id', (req, res) ->
-    App.find req.params.id, (error, app) ->
+    App.find req.params.app_id, (error, app) ->
       if error
         res.json 500, error: error
       else

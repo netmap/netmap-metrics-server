@@ -9,10 +9,10 @@ $ ->
     $.ajax('/apps',
         type: 'POST', dataType: 'json',
         data: JSON.stringify(data), contentType: 'application/json').
-        always (data, status, error) ->
+        always (result, status, error) ->
           if status is 'success'
-            $('#new-app-id').text data.id
-            $('#new-app-secret').text data.secret
+            $('#new-app-id').text result.app.id
+            $('#new-app-secret').text result.app.secret
           else
             console.error error
 
