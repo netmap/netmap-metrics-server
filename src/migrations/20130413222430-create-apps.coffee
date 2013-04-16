@@ -8,9 +8,9 @@ exports.up = (db, callback) ->
     secret: { type: 'string', length: 64, notNull: true }
     url: { type: 'string', length: 256, notNull: true }
     email: { type: 'string', length: 256, notNull: true }
-    (err) ->
-      callback err
+    (error) ->
+      callback error
 
 exports.down = (db, callback) ->
-  db.dropTable 'apps', (err) ->
-    callback err
+  db.dropTable 'apps', (error) ->
+    callback error

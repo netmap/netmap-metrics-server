@@ -1,29 +1,35 @@
 # Controller logic for the /app endpoint.
 
+App = require '../models/app'
+
 module.exports = (application) ->
   # Create.
   application.post '/apps', (req, res) ->
     console.log req.params
-    App.create req.params, (errors, app) ->
-      if errors
-        res.json 422, errors: errors
+    App.create req.params.url, req.params.email, (error, app) ->
+      if error
+        res.json 500, error: error
       else
-        res.location('apps/' + app.ex_uid).
-            json(201, id: app.ex_uid, secret: app_secret)
+        res.location('apps/' + app.exuid).json(201, app: app.json())
 
   # Retrieve.
   application.get '/apps/:app_id', (req, res) ->
-    console.log req.params
-    App.create req.params
+    App.find req.params.id, (error, app) ->
+      if error
+        res.json 500, error: error
+      else
+        if app and app.secret is req.params.secret
+          res.json 200, app: app.json()
+        else
+          res.json 404, error: "No application has ID #{params.id}"
 
   # Update.
   application.patch '/apps/:app_id', (req, res) ->
-    res.json 500, errors: 'Not yet implemented'
+    res.json 500, error: 'Not yet implemented'
 
   # Delete.
   application.delete '/apps/:app_id', (req, res) ->
-
-
+    res.json 500, error: 'Not yet implemented'
 
   # Main page for app developers.
   application.get '/', (req, res) ->

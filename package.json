@@ -17,8 +17,9 @@
   },
   "private": true,
   "dependencies": {
+    "any-db": ">= 0.4.2",
     "asset-rack": ">= 2.1.5",
-    "async": ">= 0",
+    "async": ">= 0.2.7",
     "coffee-script": ">= 1.6.2",
     "cors": ">= 0.0.5",
     "db-migrate": "git://github.com/pwnall/node-db-migrate.git#dburl",

@@ -41,7 +41,8 @@ build = (callback) ->
   for source_dir in source_dirs
     out_dir = source_dir.replace(/^src/, 'js').replace(/^test\/src/, 'test/js')
     commands.push "node node_modules/coffee-script/bin/coffee " +
-        "--output #{out_dir} --compile --map #{path.join(source_dir, '*')}"
+        "--output #{out_dir} --compile --map " +
+        path.join(source_dir, '*.coffee')
 
   async.eachSeries commands, run, ->
     callback() if callback
