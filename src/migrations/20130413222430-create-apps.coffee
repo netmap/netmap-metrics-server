@@ -14,4 +14,3 @@ exports.up = (db, callback) ->
 exports.down = (db, callback) ->
   db.dropTable 'apps', (err) ->
     callback err
-

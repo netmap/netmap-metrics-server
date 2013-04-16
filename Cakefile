@@ -27,11 +27,9 @@ task 'test', ->
 task 'doc', ->
   run 'node_modules/.bin/codo src'
 
-task 'dbcreate', ->
-  dbCreate()
-
-task 'dbmigrate' ->
-  dbMigrate()
+task 'dbmigrate', ->
+  build ->
+    dbMigrate()
 
 build = (callback) ->
   fs.mkdirSync 'js' unless fs.existsSync 'js'
@@ -70,10 +68,9 @@ vendor = (callback) ->
   async.forEachSeries downloads, download, ->
     callback() if callback
 
-dbCreate = (callback) ->
-
 dbMigrate = (callback) ->
-  run 'node node-modules/db-migrate/bin/db-migrate up'
+  run 'node node_modules/db-migrate/bin/db-migrate --migrations-dir ' +
+      'js/migrations up', callback
 
 download = ([url, file], callback) ->
   if fs.existsSync file

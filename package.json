@@ -21,7 +21,7 @@
     "async": ">= 0",
     "coffee-script": ">= 1.6.2",
     "cors": ">= 0.0.5",
-    "db-migrate": ">= 0.4.1",
+    "db-migrate": "git://github.com/pwnall/node-db-migrate.git#dburl",
     "ejs": ">= 0.8.3",
     "express": ">= 3.1.2",
     "fs-extra": ">= 0.6.0",
