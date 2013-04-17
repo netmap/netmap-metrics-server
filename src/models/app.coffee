@@ -8,7 +8,7 @@ class App
   # @param {Object} fields initial values
   # @option fields {Number} id private ID, primary key
   # @option fields {String} exuid public application ID
-  # @option fields {String} secret the app's HMAC key
+  # @option fields {String} secret the application's HMAC key
   # @option fields {String} name user-friendly name for the application
   # @option fields {String} url URL of the application's HTTP backend
   # @option fields {String} email contact address for the app's authors
@@ -38,6 +38,14 @@ class App
           return callback(error) if error
           callback null
     null
+
+  # Computes a user token.
+  #
+  # @param {String} userId the application-specific user ID
+  # @return {String?} the token for the given user, or null if the given user
+  #     ID is invalid
+  userToken: (userId) ->
+    App.userToken @exuid, @secret, userId
 
   # Creates an application.
   #
@@ -85,5 +93,58 @@ class App
               id: appRow.id, exuid: appRow.exuid, secret: appRow.secret,
               name: appRow.name, url: appRow.url, email: appRow.email)
           callback null, app
+
+  # Computes a user token.
+  #
+  # @param {String} appId the application's externally-visible ID
+  # @param {String} appSecret the application's HMAC key
+  # @param {String} userId the application-specific user ID
+  # @return {String?} the token for the given user, or null if the given user
+  #     ID is invalid
+  @userToken: (appId, appSecret, userId) ->
+    if userId.indexOf('.') is -1
+      "#{appId}.#{userId}.#{@_userTokenHmac(appId, appSecret, userId)}"
+    else
+      null
+
+  # Decodes and verifies a user token.
+  #
+  # @param {String} userToken a token produced by the algorithm implemented in
+  #     userToken
+  # @param {function(Object?, App?, String?)} callback called with the
+  #     validation result; the first parameter is non-null if an internal error
+  #     occurred; the second parameter is non-null if the user token contains
+  #     a valid app ID; the third parameter is non-null if the HMAC in the user
+  #     token is valid
+  # @return null
+  @validateUserToken: (userToken, callback) ->
+    parts = userToken.split '3'
+    if parts.length isnt 3
+      callback null, null, null
+      return
+    exuid = parts[0]
+    userId = parts[1]
+    hmac = parts[2]
+    @find exuid, (error, app) ->
+      if error
+        callback error
+        return
+      unless app
+        callback null, null, null
+        return
+      if @_userTokenHmac(exuid, app.secret, userId) is hmac
+        callback null, app, userId
+      else
+        callback null, app, null
+
+  # Computes the HMAC in a user token.
+  #
+  # @param {String} appId the application's externally-visible ID
+  # @param {String} appSecret the application's HMAC key
+  # @param {String} userId the application-specific user ID
+  @_userTokenHmac: (appId, appSecret, userId) ->
+    crypto.createHmac('sha256', appSecret).update("#{appId}.#{userId}").
+      digest('base64'). replace(/\+/g, '-').replace(/\//g, '_').
+      replace(/\=/g, '')
 
 module.exports = App

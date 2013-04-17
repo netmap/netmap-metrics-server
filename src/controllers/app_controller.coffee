@@ -26,14 +26,23 @@ appByBearerAuth = (req, res, next) ->
 
 
 module.exports = (application) ->
+  # Create user token.
+  application.get '/apps/:app_id/uid/:user_id', appByBearerAuth, (req, res) ->
+    app = req.bearerApp
+    if user_token = app.userToken(req.params.user_id)
+      res.json 200, user_token: user_token
+    else
+      res.json 400, error: 'Invalid user ID'
+
+
   # Create.
   application.post '/apps', (req, res) ->
     App.create req.body, (error, app) ->
-          if error
-            console.error error
-            res.json 500, error: 'Internal database error'
-          else
-            res.location('apps/' + app.exuid).json(201, app: app.json())
+      if error
+        console.error error
+        res.json 500, error: 'Internal database error'
+      else
+        res.location('apps/' + app.exuid).json(201, app: app.json())
 
   # Retrieve.
   application.get '/apps/:app_id', appByBearerAuth, (req, res) ->
