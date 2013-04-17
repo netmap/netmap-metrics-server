@@ -19,14 +19,33 @@ class App
   json: ->
     { id: @exuid, secret: @secret, url: @url, email: @email }
 
-  # Creates an application.
+  # Changes an application's entry in the database.
   #
-  # @param {String} url the URL of the application's HTTP backend
-  # @param {String} email a contact address for the application's authors
+  # @option {Object} fields application data
+  # @option fields {String} url the URL of the application's HTTP backend
+  # @option fields {String} email a contact address for the app's authors
   # @param {function(Object?, App?)} callback called when the application is
   #    created or an error occurs
   # @return null
-  @create: (url, email, callback) ->
+  update: (fields, callback) ->
+    url = fields.url or @url
+    email = fields.email or @email
+    pool.query 'UPDATE apps SET url=$1,email=$2 WHERE id=$3;',
+        [url, email, @id], (error, result) ->
+          return callback(error) if error
+    null
+
+  # Creates an application.
+  #
+  # @option {Object} fields application data
+  # @option fields {String} url the URL of the application's HTTP backend
+  # @option fields {String} email a contact address for the app's authors
+  # @param {function(Object?, App?)} callback called when the application is
+  #    created or an error occurs
+  # @return null
+  @create: (fields, callback) ->
+    url = fields.url
+    email = fields.email
     crypto.pseudoRandomBytes 8, (error, exuidBuffer) ->
       return callback(error) if error
       exuid = exuidBuffer.readUInt32LE 0
@@ -37,7 +56,6 @@ class App
         pool.query 'INSERT INTO apps (id,exuid,secret,url,email) VALUES ' +
             "(DEFAULT,#{exuid},'#{secret}',$1,$2) RETURNING id;",
             [url, email], (error, result) ->
-              throw error if error
               return callback(error) if error
               id = result.rows[0].id
               app = new App(
@@ -51,7 +69,7 @@ class App
   # @param {function(Object?, App?)} callback called when application is found
   #   or an error occurs
   @find: (exuid, callback) ->
-    pool.query 'SELECT * FROM apps WHERE exuid=? LIMIT 1', [exuid],
+    pool.query 'SELECT * FROM apps WHERE exuid=$1 LIMIT 1', [exuid],
         (error, result) ->
           return callback(error) if error
           return callback(null, null) if result.rowCount is 0
