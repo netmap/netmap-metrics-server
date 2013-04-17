@@ -12,7 +12,7 @@
 
   <section id="new-app-container">
     <h2>Create application</h2>
-    <form id="new-app-form">
+    <form id="new-app-form" action="apps/" method="POST">
       <p class="field">
         <label for="new-app-name">App Name</label>
         <input type="text" required="required" name="name" id="new-app-name" />
@@ -27,7 +27,7 @@
                id="new-app-email" />
       </p>
       <p class="action">
-        <button type="button" id="new-app-button">Create App</button>
+        <button type="submit" id="new-app-button">Create App</button>
       </p>
     </form>
 
@@ -62,7 +62,7 @@
                id="app-lookup-secret" />
       </p>
       <p class="action">
-        <button type="button" id="app-lookup-button">Lookup</button>
+        <button type="submit" id="app-lookup-button">Lookup</button>
       </p>
     </form>
 
@@ -76,20 +76,24 @@
                  id="edit-app-name" />
         </p>
         <p class="field">
-          <label for="new-app-url">Backend URL</label>
+          <label for="edit-app-url">Backend URL</label>
           <input type="url" required="required" name="url"
                  id="edit-app-url" />
         </p>
         <p class="field">
-          <label for="new-app-email">Email</label>
+          <label for="edit-app-email">Email</label>
           <input type="email" required="required" name="email"
                  id="edit-app-email" />
         </p>
         <p class="action">
-          <button type="button" id="edit-app-button">Update App</button>
+          <button type="submit" id="edit-app-button">Update App</button>
         </p>
       </form>
     </section>
+    <p id="edit-app-response" class="hidden">
+      Application edited successfully
+      <button type="button" id="edit-app-hide-button">Hide</button>
+    </p>
   </section>
 </body>
 </html>

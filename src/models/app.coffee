@@ -24,8 +24,8 @@ class App
   # @option {Object} fields application data
   # @option fields {String} url the URL of the application's HTTP backend
   # @option fields {String} email a contact address for the app's authors
-  # @param {function(Object?, App?)} callback called when the application is
-  #    created or an error occurs
+  # @param {function(Object?)} callback called when the application's database
+  #    record is updated or an error occurs
   # @return null
   update: (fields, callback) ->
     url = fields.url or @url
@@ -33,6 +33,7 @@ class App
     pool.query 'UPDATE apps SET url=$1,email=$2 WHERE id=$3;',
         [url, email, @id], (error, result) ->
           return callback(error) if error
+          callback null
     null
 
   # Creates an application.

@@ -16,13 +16,13 @@ appByBearerAuth = (req, res, next) ->
       res.json 500, error: 'Internal database error'
     else
       if app
-        if app.secret is req.bearer
+        if app.secret is bearer
           req.bearerApp = app
           next()
         else
           res.json 403, erorr: 'Incorrect secret'
       else
-        res.json 404, error: "No application has ID #{params.id}"
+        res.json 404, error: "No application with ID #{params.app_id}"
 
 
 module.exports = (application) ->
@@ -30,7 +30,8 @@ module.exports = (application) ->
   application.post '/apps', (req, res) ->
     App.create url: req.body.url, email: req.body.email, (error, app) ->
       if error
-        res.json 500, error: error
+        console.error error
+        res.json 500, error: 'Internal database error'
       else
         res.location('apps/' + app.exuid).json(201, app: app.json())
 
@@ -40,8 +41,13 @@ module.exports = (application) ->
 
   # Update.
   application.patch '/apps/:app_id', appByBearerAuth, (req, res) ->
-    req.bearerApp.update url: req.body.url, email: req.body.email, (error) ->
-
+    app = req.bearerApp
+    app.update url: req.body.url, email: req.body.email, (error) ->
+      if error
+        console.error error
+        res.json 500, error: 'Internal database error'
+      else
+        res.json 200, app: app.json()
 
   # Main page for app developers.
   application.get '/', (req, res) ->
