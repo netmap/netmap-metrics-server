@@ -4,5 +4,6 @@
 #
 #= require views/app_create.coffee
 #= require views/app_edit.coffee
+#= require views/reading_create.coffee
 #= require views/uid_create.coffee
 #
