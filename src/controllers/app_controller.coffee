@@ -28,12 +28,12 @@ appByBearerAuth = (req, res, next) ->
 module.exports = (application) ->
   # Create.
   application.post '/apps', (req, res) ->
-    App.create url: req.body.url, email: req.body.email, (error, app) ->
-      if error
-        console.error error
-        res.json 500, error: 'Internal database error'
-      else
-        res.location('apps/' + app.exuid).json(201, app: app.json())
+    App.create req.body, (error, app) ->
+          if error
+            console.error error
+            res.json 500, error: 'Internal database error'
+          else
+            res.location('apps/' + app.exuid).json(201, app: app.json())
 
   # Retrieve.
   application.get '/apps/:app_id', appByBearerAuth, (req, res) ->
@@ -42,7 +42,7 @@ module.exports = (application) ->
   # Update.
   application.patch '/apps/:app_id', appByBearerAuth, (req, res) ->
     app = req.bearerApp
-    app.update url: req.body.url, email: req.body.email, (error) ->
+    app.update req.body, (error) ->
       if error
         console.error error
         res.json 500, error: 'Internal database error'

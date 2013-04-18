@@ -9,6 +9,7 @@ class App
   # @option fields {Number} id private ID, primary key
   # @option fields {String} exuid public application ID
   # @option fields {String} secret the app's HMAC key
+  # @option fields {String} name user-friendly name for the application
   # @option fields {String} url URL of the application's HTTP backend
   # @option fields {String} email contact address for the app's authors
   constructor: (fields) ->
@@ -17,21 +18,23 @@ class App
 
   # @return {Object} JSON-compatible object representing the app fields
   json: ->
-    { id: @exuid, secret: @secret, url: @url, email: @email }
+    { id: @exuid, secret: @secret, name: @name, url: @url, email: @email }
 
   # Changes an application's entry in the database.
   #
   # @option {Object} fields application data
+  # @option fields {String} name user-friendly name for the application
   # @option fields {String} url the URL of the application's HTTP backend
   # @option fields {String} email a contact address for the app's authors
   # @param {function(Object?)} callback called when the application's database
   #    record is updated or an error occurs
   # @return null
   update: (fields, callback) ->
+    name = fields.name or @name
     url = fields.url or @url
     email = fields.email or @email
-    pool.query 'UPDATE apps SET url=$1,email=$2 WHERE id=$3;',
-        [url, email, @id], (error, result) ->
+    pool.query 'UPDATE apps SET name=$1,url=$2,email=$3 WHERE id=$4;',
+        [name, url, email, @id], (error, result) ->
           return callback(error) if error
           callback null
     null
@@ -39,12 +42,14 @@ class App
   # Creates an application.
   #
   # @option {Object} fields application data
+  # @option fields {String} name user-friendly name for the application
   # @option fields {String} url the URL of the application's HTTP backend
   # @option fields {String} email a contact address for the app's authors
   # @param {function(Object?, App?)} callback called when the application is
   #    created or an error occurs
   # @return null
   @create: (fields, callback) ->
+    name = fields.name
     url = fields.url
     email = fields.email
     crypto.pseudoRandomBytes 8, (error, exuidBuffer) ->
@@ -54,9 +59,9 @@ class App
         return callback(error) if error
         secret = secretBuffer.toString('base64').replace(/\+/g, '-').
                               replace(/\//g, '_').replace(/\=/g, '')
-        pool.query 'INSERT INTO apps (id,exuid,secret,url,email) VALUES ' +
-            "(DEFAULT,#{exuid},'#{secret}',$1,$2) RETURNING id;",
-            [url, email], (error, result) ->
+        pool.query 'INSERT INTO apps (id,exuid,secret,name,url,email) ' +
+            "VALUES (DEFAULT,#{exuid},'#{secret}',$1,$2,$3) RETURNING id;",
+            [name, url, email], (error, result) ->
               return callback(error) if error
               id = result.rows[0].id
               app = new App(
@@ -78,7 +83,7 @@ class App
           appRow = result.rows[0]
           app = new App(
               id: appRow.id, exuid: appRow.exuid, secret: appRow.secret,
-              url: appRow.url, email: appRow.email)
+              name: appRow.name, url: appRow.url, email: appRow.email)
           callback null, app
 
 module.exports = App
