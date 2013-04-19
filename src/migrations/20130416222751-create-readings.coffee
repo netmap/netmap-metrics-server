@@ -5,7 +5,8 @@ exports.up = (db, callback) ->
   db.createTable 'readings',
     id: { type: 'bigint', primaryKey: true, autoIncrement: true }
     app_id: { type: 'int', nonNull: true }
-    user_id: { type: 'string', length: 16, notNull: true }
+    app_uid: { type: 'string', length: 16, notNull: true }
+    digest: { type: 'string', length: 64, notNull: true }
     json_data: { type: 'text', notNull: true }
     created_at: { type: 'datetime', notNull: true }
     (error) ->

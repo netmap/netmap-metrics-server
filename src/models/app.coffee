@@ -107,17 +107,18 @@ class App
     else
       null
 
-  # Decodes and verifies a user token.
+  # Decodes and verifies a batch of tokens.
   #
-  # @param {String} userToken a token produced by the algorithm implemented in
-  #     userToken
-  # @param {function(Object?, App?, String?)} callback called with the
-  #     validation result; the first parameter is non-null if an internal error
-  #     occurred; the second parameter is non-null if the user token contains
-  #     a valid app ID; the third parameter is non-null if the HMAC in the user
-  #     token is valid
+  # @param {Array<String>} userTokens tokens produced by the algorithm
+  #     implemented in userToken
+  # @param {function(Object?, Array?<App>, Array?<String>)} callback called
+  #     with the validation results; the first parameter is non-null if an
+  #     internal error occurred; for each token, a corresponding entry in the
+  #     second parameter is non-null if the user token contains a valid app ID;
+  #     the corresponding entry in the third parameter is non-null if the HMAC
+  #     in the user token is valid
   # @return null
-  @validateUserToken: (userToken, callback) ->
+  @validateUserTokens: (userToken, callback) ->
     parts = userToken.split '3'
     if parts.length isnt 3
       callback null, null, null
