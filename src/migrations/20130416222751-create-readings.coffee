@@ -7,8 +7,9 @@ exports.up = (db, callback) ->
     app_id: { type: 'int', nonNull: true }
     app_uid: { type: 'string', length: 16, notNull: true }
     digest: { type: 'string', length: 64, notNull: true }
-    json_data: { type: 'text', notNull: true }
     created_at: { type: 'datetime', notNull: true }
+    ip: { type: 'string', length: 45, notNull: true }
+    json_data: { type: 'text', notNull: true }
     (error) ->
       if error
         callback error

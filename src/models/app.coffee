@@ -118,25 +118,51 @@ class App
   #     the corresponding entry in the third parameter is non-null if the HMAC
   #     in the user token is valid
   # @return null
-  @validateUserTokens: (userToken, callback) ->
-    parts = userToken.split '3'
-    if parts.length isnt 3
-      callback null, null, null
-      return
-    exuid = parts[0]
-    userId = parts[1]
-    hmac = parts[2]
-    @find exuid, (error, app) ->
+  @validateUserTokens: (userTokens, callback) ->
+    cbApps = []
+    cbAppUids = []
+    hmacs = []
+
+    appIds = []
+    appsById = {}
+    for userToken, i in userTokens
+      parts = userToken.split '.'
+      if parts.length isnt 3
+        callback null, null, null
+        return
+
+      exuid = parts[0]
+      cbApps.push exuid
+      cbAppUids.push parts[1]
+      hmacs.push parts[2]
+
+      unless exuid in appsById
+        appsById[exuid] = true
+        appIds.push exuid
+
+    sql = 'SELECT id,exuid,secret FROM apps WHERE exuid IN (' +
+        appIds.join(',') + ');'
+    pool.query sql, (error, result) =>
       if error
         callback error
         return
-      unless app
-        callback null, null, null
-        return
-      if @_userTokenHmac(exuid, app.secret, userId) is hmac
-        callback null, app, userId
-      else
-        callback null, app, null
+      for appRow in result.rows
+        appsById[appRow.exuid] = new App(
+            exuid: appRow.exuid, id: appRow.id, secret: appRow.secret)
+
+      for hmac, i in hmacs
+        exuid = cbApps[i]
+        app = appsById[exuid]
+        if app is true  # No app with this ID exists in the database.
+          cbApps[i] = null
+          cbAppUids[i] = null
+
+        cbApps[i] = app
+        appUid = cbAppUids[i]
+        if @_userTokenHmac(exuid, app.secret, appUid) isnt hmac
+          cbAppUids[i] = null  # Invalid HMAC in the token.
+
+      callback null, cbApps, cbAppUids
 
   # Computes the HMAC in a user token.
   #

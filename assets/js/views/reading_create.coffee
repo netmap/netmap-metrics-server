@@ -6,7 +6,7 @@ $ ->
     jsonData = $('#reading-upload-json').val()
     $.ajax('/readings',
         type: 'POST', dataType: 'json',
-        data: jsonData, contentType: 'application/json').
+        data: jsonData, contentType: 'application/x-multi-json').
         always (result, status, error) ->
           if status is 'success'
             $readingUploadResponse.removeClass 'hidden'

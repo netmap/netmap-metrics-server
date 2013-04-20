@@ -1,5 +1,6 @@
 crypto = require 'crypto'
 
+pool = require('../database').pool
 App = require './app'
 
 # A measurement collected by the network sensors in a game client.
@@ -21,25 +22,31 @@ class Reading
   # @param {String} batchData the JSON data representing the readings; each
   #    reading's data should be JSON-encoded, and the readings should be
   #    separated by a single newline
+  # @param {String} ip the uploader's IP address
   # @param {function(Object?, Reading?)} callback called when the reading is
   #    saved or an error occurs
   # @return null
-  @createBatch: (batchData, callback) ->
+  @createBatch: (batchData, ip, callback) ->
     digests = []
     readings = {}
-    for rawReading in batchData.split("\n")
+    for rawReading in batchData.split(/(\n|\r)+/)
+      json = rawReading.trim()
+      continue if json.length is 0
       try
-        reading = JSON.decode rawReading
+        reading = JSON.parse json
       catch jsonError  # Malformed JSON
         callback 'Invalid JSON data in reading'
         return
       digest = @dataDigest rawReading
-      readings[digest] = { token: digest.uid, json: rawReading }
+      unless token = reading.uid
+        callback 'Reading missing user ID (uid) property'
+        return
+      readings[digest] = { token: token, json: rawReading }
       digests.push digest
 
     # Eliminate duplicates.
-    sql = 'SELECT digest FROM readings WHERE digest in ("' +
-          digests.join('","') + '");'
+    sql = "SELECT digest FROM readings WHERE digest IN ('" +
+          digests.join("','") + "');"
     pool.query sql, (error, result) ->
       if error
         callback error
@@ -50,46 +57,59 @@ class Reading
         for row in result.rows
           delete readings[row.digest]
 
-      # Resolve the apps in tokens.
+      # Collect the user tokens from the recordings.
       tokenIndex = {}
       tokenList = []
       for digest, reading of readings
         token = reading.token
-        unless token of tokenSet
+        unless token of tokenIndex
           tokenIndex[token] = tokenList.length
           tokenList.push token
+      if tokenList.length is 0  # All the recordings have been uploaded before.
+        callback null
+        return
 
       App.validateUserTokens tokenList, (error, apps, app_uids) ->
         if error
           callback error
           return
+        if apps is null
+          callback 'Invalid user ID (uid) value in reading'
+          return
 
         # Insert tokens.
-        sql = 'INSERT INTO readings (id,app_id,app_uid,digest,json_data) VALUES ';
+        sql = ['INSERT INTO readings (id,app_id,app_uid,digest,created_at,' +
+               'ip,json_data) VALUES ']
+        values = []
+        dollar = 0
+        firstRow = true
         for digest, reading of readings
           index = tokenIndex[reading.token]
-          app = apps[tokenIndex]
-          app_uid = app_uids[tokenIndex]
+          app = apps[index]
+          app_uid = app_uids[index]
           if app is null
             callback "User token points to invalid app", null
             return
           if app_uid is null
             callback "Invalid HMAC in user token", null
 
-        callback null
+          if firstRow
+            sql.push "(DEFAULT,#{app.id},$#{dollar + 1},'#{digest}'," +
+                     "now(),'#{ip}',$#{dollar + 2})"
+            firstRow = false
+          else
+            sql.push ",(DEFAULT,#{app.id},$#{dollar + 1},'#{digest}'," +
+                     "now(),'#{ip}',$#{dollar + 2})"
+          dollar += 2
+          values.push app_uid
+          values.push reading.json
+        sql.push ';'
 
-
-    userToken = jsonData.uid
-    App.validateUserToken userToken, (error, app, userId) ->
-      # TODO(pwnall): check for dupes
-      pool.query 'INSERT INTO recordings (id,app_id,app_uid,json) ' +
-          "VALUES (DEFAULT,#{app.id},$1,$2,$3) RETURNING id;",
-          [name, url, email], (error, result) ->
-            return callback(error) if error
-            id = result.rows[0].id
-            app = new App(
-                id: id, exuid: exuid, secret: secret, url: url, email: email)
-            callback null, app
+        pool.query sql.join(''), values, (error, result) ->
+          if error
+            callback error
+            return
+          callback null
     null
 
   # Computes a digest of a piece of JSON-encoded data.
@@ -97,3 +117,5 @@ class Reading
   # @param {String} jsonData
   @dataDigest: (jsonData) ->
     crypto.createHash('sha256').update(jsonData, 'utf8').digest('base64')
+
+module.exports = Reading
