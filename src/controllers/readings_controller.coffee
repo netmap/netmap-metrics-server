@@ -15,5 +15,13 @@ module.exports = (application) ->
           else
             console.error error
             res.json 500, error: 'Internal database error.'
+        else
+          res.json 200, status: 'OK'
 
-        res.json 200, status: 'OK'
+  application.get '/readings/above/:start_id', (req, res) ->
+    Reading.list start: req.params.start_id, (error, jsonData) ->
+      if error
+        console.error error
+        res.json 500, error: 'Internal database error.'
+      else
+        res.json 200, jsonData

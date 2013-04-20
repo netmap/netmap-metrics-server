@@ -37,7 +37,7 @@ class Reading
       catch jsonError  # Malformed JSON
         callback 'Invalid JSON data in reading'
         return
-      digest = @dataDigest rawReading
+      digest = @_dataDigest rawReading
       unless token = reading.uid
         callback 'Reading missing user ID (uid) property'
         return
@@ -112,10 +112,38 @@ class Reading
           callback null
     null
 
+  # Returns a list of readings
+  #
+  # @param {Object} query determine which readings get returned
+  # @option query {Number} limit maximum number of readings to be returned;
+  #     this will be clamed to the hard limit defined by maxListSize
+  # @option query {Number} startId
+  # @param {function{Object?, Array?<Reading>}) callback called when the
+  #    database query completes
+  @list: (query, callback) ->
+    startId = parseInt(query.start) or 0
+    limit = Math.min parseInt(query.limit) or @maxListSize, @maxListSize
+
+    sql = 'SELECT readings.id AS id,exuid,app_uid,created_at,ip,json_data ' +
+        'FROM readings JOIN apps ON app_id=apps.id ' +
+        "WHERE readings.id > #{startId} ORDER BY readings.id LIMIT #{limit};"
+    pool.query sql, (error, result) ->
+      if error
+        callback error
+        return
+      apps = for appRow in result.rows
+        serial: appRow.id, app_id: appRow.exuid, app_uid: appRow.app_uid,
+        created_at: appRow.created_at, ip: appRow.ip,
+        data: JSON.parse(appRow.json_data)
+      callback null, apps
+
+  # Maximum number of readings returned by list.
+  @maxListSize: 1000
+
   # Computes a digest of a piece of JSON-encoded data.
   #
   # @param {String} jsonData
-  @dataDigest: (jsonData) ->
+  @_dataDigest: (jsonData) ->
     crypto.createHash('sha256').update(jsonData, 'utf8').digest('base64')
 
 module.exports = Reading

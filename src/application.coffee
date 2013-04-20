@@ -37,6 +37,9 @@ application.locals assets: assets
 if appEnv is 'development'
   application.use express.logger()
 
+application.use cors(
+    methods: ['GET', 'PATCH', 'POST'], maxAge: 365 * 24 * 60 * 60,
+    headers: ['Authorization', 'Content-Type'], credentials: false)
 application.use assets
 application.use express.static(path.join(appRoot, 'public'))
 application.use express.json()
