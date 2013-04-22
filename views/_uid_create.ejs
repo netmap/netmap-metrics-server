@@ -1,0 +1,37 @@
+<section id="token-generator-container">
+  <h2>Generate User Token</h2>
+
+  <form id="token-generator-form">
+    <p class="field">
+      <label for="token-generator-id">App ID</label>
+      <input type="text" required="required" name="_app_id"
+             id="token-generator-id" />
+    </p>
+    <p class="field">
+      <label for="token-generator-secret">App Secret</label>
+      <input type="text" required="required" name="_app_secret"
+             id="token-generator-secret" />
+    </p>
+    <p class="field">
+      <label for="token-generator-uid">User ID</label>
+      <input type="text" required="required" name="uid"
+             id="token-generator-uid" />
+    </p>
+
+    <p class="action">
+      <button type="submit" id="token-generator-button">
+        Generate Token
+      </button>
+    </p>
+  </form>
+
+  <section id="token-generator-response" class="hidden">
+    <p class="field">
+      <span>User Token</span>
+      <span id="user-token"></span>
+    </p>
+    <p class="action">
+      <button type="button" id="token-hide-button">Hide Info</button>
+    </p>
+  </section>
+</section>

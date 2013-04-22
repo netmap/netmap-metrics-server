@@ -1,0 +1,24 @@
+<section id="reading-upload-container">
+  <h2>Upload Reading Data</h2>
+
+  <form id="reading-upload-form">
+    <p>
+      <label for="reading-upload-json">JSON data</label>
+    </p>
+    <p>
+      <textarea required="required" name="json"
+                id="reading-upload-json"></textarea>
+    </p>
+
+    <p class="action">
+      <button type="submit" id="reading-upload-button">
+        Upload Reading
+      </button>
+    </p>
+  </form>
+
+  <p id="reading-upload-response" class="hidden">
+    Data submitted successfully
+    <button type="button" id="reading-upload-hide-button">Hide</button>
+  </p>
+</section>

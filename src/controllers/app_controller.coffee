@@ -37,6 +37,9 @@ module.exports = (application) ->
 
   # Create.
   application.post '/apps', (req, res) ->
+    if application.locals.production
+      req.body.id = null
+      req.body.secret = null
     App.create req.body, (error, app) ->
       if error
         console.error error

@@ -1,0 +1,49 @@
+<section id="new-app-container">
+  <h2>Create application</h2>
+  <form id="new-app-form" action="apps/" method="POST">
+    <% if (!production) { %>
+    <p class="field">
+      <label for="new-app-devmode-id">App ID</label>
+      <input type="text" name="id" id="new-app-devmode-id"
+             placeholder="optionally reuse your production id" />
+    </p>
+    <p class="field">
+      <label for="new-app-devmode-secret">App Secret</label>
+      <input type="text" name="secret" id="new-app-devmode-secret"
+             placeholder="optionally reuse your production secret" />
+    <% } %>
+    <p class="field">
+      <label for="new-app-name">App Name</label>
+      <input type="text" required="required" name="name" id="new-app-name"
+             placeholder="Best Game Ever" />
+    </p>
+    <p class="field">
+      <label for="new-app-url">Backend URL</label>
+      <input type="url" required="required" name="url" id="new-app-url"
+             placeholder="http://my.game.com/metrics_callback" />
+    </p>
+    <p class="field">
+      <label for="new-app-email">Email</label>
+      <input type="email" required="required" name="email"
+             id="new-app-email" placeholder="you@gmail.com" />
+    </p>
+    <p class="action">
+      <button type="submit" id="new-app-button">Create App</button>
+    </p>
+  </form>
+
+  <section id="new-app-response" class="hidden">
+    <h3>New application data</h3>
+    <p class="field">
+      <span>App ID</span>
+      <span id="new-app-id"></span>
+    </p>
+    <p class="field">
+      <span>App Secret</span>
+      <span id="new-app-secret"></span>
+    </p>
+    <p class="action">
+      <button type="button" id="new-app-hide-button">Hide Info</button>
+    </p>
+  </section>
+</section>

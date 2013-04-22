@@ -20,6 +20,9 @@ application.set 'views', path.join(appRoot, 'views')
 application.set 'view engine', 'ejs'
 application.set 'view options', layout: false
 
+# Locals in views.
+application.locals.production = appEnv isnt 'development'
+
 # Assets
 assets = new rack.Rack [
   new rack.LessAsset

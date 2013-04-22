@@ -1,0 +1,49 @@
+<section id="edit-app-container">
+  <h2>Amend application</h2>
+
+  <form id="app-lookup-form">
+    <p class="field">
+      <label for="app-lookup-id">App ID</label>
+      <input type="text" required="required" name="id"
+             id="app-lookup-id" />
+    </p>
+    <p class="field">
+      <label for="app-lookup-secret">App Secret</label>
+      <input type="text" required="required" name="secret"
+             id="app-lookup-secret" />
+    </p>
+    <p class="action">
+      <button type="submit" id="app-lookup-button">Lookup</button>
+    </p>
+  </form>
+
+  <section id="app-lookup-response" class="hidden">
+    <form id="edit-app-form">
+      <input type="hidden" name="_app_id" id="edit-app-id" />
+      <input type="hidden" name="_app_secret" id="edit-app-secret" />
+      <p class="field">
+        <label for="edit-app-name">App Name</label>
+        <input type="text" required="required" name="name"
+               id="edit-app-name" />
+      </p>
+      <p class="field">
+        <label for="edit-app-url">Backend URL</label>
+        <input type="url" required="required" name="url"
+               id="edit-app-url" />
+      </p>
+      <p class="field">
+        <label for="edit-app-email">Email</label>
+        <input type="email" required="required" name="email"
+               id="edit-app-email" />
+      </p>
+      <p class="action">
+        <button type="submit" id="edit-app-button">Update App</button>
+      </p>
+    </form>
+  </section>
+  <p id="edit-app-response" class="hidden">
+    Application edited successfully
+    <button type="button" id="edit-app-hide-button">Hide</button>
+  </p>
+</section>
+

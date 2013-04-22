@@ -50,6 +50,10 @@ class App
   # Creates an application.
   #
   # @option {Object} fields application data
+  # @option fields {String} id the application's external ID; if null, a random
+  #     ID will be auto-generated
+  # @option fields {String} secret the application's HMAC key; if null, a
+  #     random key will be auto-generated
   # @option fields {String} name user-friendly name for the application
   # @option fields {String} url the URL of the application's HTTP backend
   # @option fields {String} email a contact address for the app's authors
@@ -62,11 +66,16 @@ class App
     email = fields.email
     crypto.pseudoRandomBytes 8, (error, exuidBuffer) ->
       return callback(error) if error
-      exuid = exuidBuffer.readUInt32LE 0
+      if 'id' of fields
+        exuid = parseInt(fields.id)
+      exuid or= exuidBuffer.readUInt32LE 0
       crypto.randomBytes 16, (error, secretBuffer) ->
         return callback(error) if error
-        secret = secretBuffer.toString('base64').replace(/\+/g, '-').
-                              replace(/\//g, '_').replace(/\=/g, '')
+        if fields.secret and /^[0-9a-zA-Z-_]+$/.test(fields.secret)
+          secret = fields.secret
+        else
+          secret = secretBuffer.toString('base64').replace(/\+/g, '-').
+                                replace(/\//g, '_').replace(/\=/g, '')
         pool.query 'INSERT INTO apps (id,exuid,secret,name,url,email) ' +
             "VALUES (DEFAULT,#{exuid},'#{secret}',$1,$2,$3) RETURNING id;",
             [name, url, email], (error, result) ->
