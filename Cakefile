@@ -31,6 +31,11 @@ task 'dbmigrate', ->
   build ->
     dbMigrate()
 
+task 'devapp', ->
+  build ->
+    devApp()
+
+
 build = (callback) ->
   fs.mkdirSync 'js' unless fs.existsSync 'js'
   fs.mkdirSync 'test/js' unless fs.existsSync 'test/js'
@@ -72,6 +77,28 @@ vendor = (callback) ->
 dbMigrate = (callback) ->
   run 'node node_modules/db-migrate/bin/db-migrate --migrations-dir ' +
       'js/migrations up', callback
+
+devApp = (callback) ->
+  appDetails =
+      id: 123456789, secret: 'DevelopmentSecret-_-00',
+      name: 'Development Keys', url: 'http://netmap.local/metrics',
+      email: 'netmap+devs@localhost'
+  pool = require('./js/database').pool
+  App = require './js/models/app'
+  App.find appDetails.id, (error, app) ->
+    if error
+      console.error error
+      process.exit 1
+    if app isnt null
+      callback() if callback
+      pool.close()
+      return
+    App.create appDetails, (error, app) ->
+      if error
+        console.error error
+        process.exit 1
+      callback() if callback
+      pool.close()
 
 download = ([url, file], callback) ->
   if fs.existsSync file
