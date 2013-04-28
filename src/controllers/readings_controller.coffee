@@ -8,6 +8,8 @@ module.exports = (application) ->
     req.on 'data', (chunk) ->
       body.push chunk
     req.on 'end', ->
+      unless application.locals.production
+        console.log body.join('')
       Reading.createBatch body.join(''), req.ip, (error) ->
         if error
           if typeof error is 'string'

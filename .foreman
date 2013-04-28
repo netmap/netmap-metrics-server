@@ -1,0 +1,3 @@
+application: netmap-metrics
+concurrency: web=1
+port: 11000

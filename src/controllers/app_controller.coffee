@@ -34,7 +34,6 @@ module.exports = (application) ->
     else
       res.json 400, error: 'Invalid user ID'
 
-
   # Create.
   application.post '/apps', (req, res) ->
     if application.locals.production

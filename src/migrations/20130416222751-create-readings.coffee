@@ -5,7 +5,7 @@ exports.up = (db, callback) ->
   db.createTable 'readings',
     id: { type: 'bigint', primaryKey: true, autoIncrement: true }
     app_id: { type: 'int', nonNull: true }
-    app_uid: { type: 'string', length: 16, notNull: true }
+    app_uid: { type: 'string', length: 32, notNull: true }
     digest: { type: 'string', length: 64, notNull: true }
     created_at: { type: 'datetime', notNull: true }
     ip: { type: 'string', length: 45, notNull: true }
