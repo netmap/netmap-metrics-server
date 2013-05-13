@@ -29,19 +29,20 @@ class Reading
   @createBatch: (batchData, ip, callback) ->
     digests = []
     readings = {}
-    for rawReading in batchData.split(/(\n|\r)+/)
+    errors = []
+    for rawReading, index in batchData.split(/(\n|\r)+/)
       json = rawReading.trim()
       continue if json.length is 0
       try
         reading = JSON.parse json
       catch jsonError  # Malformed JSON
-        callback 'Invalid JSON data in reading'
-        return
+        errors.push "Reading #{index + 1}: invalid JSON"
+        continue
       digest = @_dataDigest rawReading
       unless token = reading.uid
-        callback 'Reading missing user ID (uid) property'
-        return
-      readings[digest] = { token: token, json: rawReading }
+        errors.push "Reading #{index + 1}: missing user ID (uid) property"
+        continue
+      readings[digest] = { token: token, json: rawReading, index: index }
       digests.push digest
 
     # Eliminate duplicates.
@@ -66,7 +67,10 @@ class Reading
           tokenIndex[token] = tokenList.length
           tokenList.push token
       if tokenList.length is 0  # All the recordings have been uploaded before.
-        callback null
+        if errors.length is 0
+          callback null
+        else
+          callback errors
         return
 
       App.validateUserTokens tokenList, (error, apps, app_uids) ->
@@ -87,12 +91,17 @@ class Reading
           index = tokenIndex[reading.token]
           app = apps[index]
           app_uid = app_uids[index]
-          if app is null
-            callback "User token points to invalid app", null
-            return
+          if app is false
+            errors.push "Reading #{reading.index + 1}: invalid user token"
+            continue
+          else if app is null
+            errors.push(
+                "Reading #{reading.index + 1}: invalid app id in user token")
+            continue
           if app_uid is null
-            callback "Invalid HMAC in user token", null
-
+            errors.push(
+                "Reading: #{reading.index + 1}: invalid HMAC in user token")
+            continue
           if firstRow
             sql.push "(DEFAULT,#{app.id},$#{dollar + 1},'#{digest}'," +
                      "now(),'#{ip}',$#{dollar + 2})"
@@ -103,13 +112,24 @@ class Reading
           dollar += 2
           values.push app_uid
           values.push reading.json
-        sql.push ';'
 
+        if sql.length is 1
+          # All the records are invalid or duplicated.
+          if errors.length is 0
+            callback null
+          else
+            callback errors
+          return
+
+        sql.push ';'
         pool.query sql.join(''), values, (error, result) ->
           if error
             callback error
             return
-          callback null
+          if errors.length is 0
+            callback null
+          else
+            callback errors
     null
 
   # Returns a list of readings

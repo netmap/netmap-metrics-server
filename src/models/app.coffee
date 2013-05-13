@@ -137,8 +137,10 @@ class App
     for userToken, i in userTokens
       parts = userToken.split '.'
       if parts.length isnt 3
-        callback null, null, null
-        return
+        cbApps.push null
+        cbAppUids.push null
+        hmacs.push null
+        continue
 
       exuid = parts[0]
       cbApps.push exuid
@@ -160,6 +162,10 @@ class App
             exuid: appRow.exuid, id: appRow.id, secret: appRow.secret)
 
       for hmac, i in hmacs
+        if hmac is null  # Invalid token format.
+          cbApps[i] = false
+          cbAppUids[i] = false
+          continue
         exuid = cbApps[i]
         app = appsById[exuid]
         if app is true  # No app with this ID exists in the database.

@@ -15,8 +15,11 @@ module.exports = (application) ->
           if typeof error is 'string'
             res.json 500, error: error
           else
-            console.error error
-            res.json 500, error: 'Internal database error.'
+            if Array.isArray error
+              res.json 400, errors: error
+            else
+              console.error error
+              res.json 500, error: 'Internal database error.'
         else
           res.json 200, status: 'OK'
 
