@@ -165,11 +165,11 @@ class App
         if app is true  # No app with this ID exists in the database.
           cbApps[i] = null
           cbAppUids[i] = null
-
-        cbApps[i] = app
-        appUid = cbAppUids[i]
-        if @_userTokenHmac(exuid, app.secret, appUid) isnt hmac
-          cbAppUids[i] = null  # Invalid HMAC in the token.
+        else
+          cbApps[i] = app
+          appUid = cbAppUids[i]
+          if @_userTokenHmac(exuid, app.secret, appUid) isnt hmac
+            cbAppUids[i] = null  # Invalid HMAC in the token.
 
       callback null, cbApps, cbAppUids
 
