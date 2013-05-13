@@ -179,8 +179,8 @@ class App
   # @param {String} appSecret the application's HMAC key
   # @param {String} userId the application-specific user ID
   @_userTokenHmac: (appId, appSecret, userId) ->
-    crypto.createHmac('sha256', appSecret).update("#{appId}.#{userId}").
-      digest('base64'). replace(/\+/g, '-').replace(/\//g, '_').
-      replace(/\=/g, '')
+    crypto.createHmac('sha256', new Buffer(appSecret, 'binary')).
+        update("#{appId}.#{userId}").digest('base64').replace(/\+/g, '-').
+        replace(/\//g, '_').replace(/\=/g, '')
 
 module.exports = App
